@@ -132,7 +132,7 @@ def test_triage_keeps_products_when_newest_email_has_none() -> None:
     newer = _raw(
         "Confirmation of your order changes",
         "Wed, 04 Nov 2026 10:00:00 +0000",
-        PRODUCTS_BODY.split("Products you’ve ordered")[0]
+        PRODUCTS_BODY.split("Products you’ve ordered", maxsplit=1)[0]
         + "You can edit this order until 11:12pm, 12 November 2026",
     )
     older = _raw(
