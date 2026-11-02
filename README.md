@@ -173,7 +173,7 @@ It has two attributes:
 
 This sensor provides the date of the next booked delivery using the collation of all "order is confirmed" emails available.
 
-It has six attributes:
+It has seven attributes:
 
 | **Attribute**          | **Description**                                            |
 |------------------------|------------------------------------------------------------|
@@ -183,6 +183,7 @@ It has six attributes:
 | **Delivery window**    | This is the delivery window found for the next delivery.   |
 | **Edit deadline**      | This is the edit deadline found for the next delivery.     |
 | **Estimated total**    | This is the estimated total found for the next delivery.   |
+| **Products**           | The products ordered for the next delivery: a list of `name`, `quantity` and `price`, from the latest email that lists them. |
 
 </div>
 </details>
@@ -211,7 +212,7 @@ It has two attributes:
 
 This sensor provides the date of the next booked delivery after the next booked delivery using the collation of all "order is confirmed" emails available.
 
-It has six attributes:
+It has seven attributes:
 
 | **Attribute**          | **Description**                                                |
 |------------------------|----------------------------------------------------------------|
@@ -221,6 +222,7 @@ It has six attributes:
 | **Delivery window**    | This is the delivery window found for the upcoming delivery.   |
 | **Edit deadline**      | This is the edit deadline found for the upcoming delivery.     |
 | **Estimated total**    | This is the estimated total found for the upcoming delivery.   |
+| **Products**           | The products ordered for the upcoming delivery: a list of `name`, `quantity` and `price`, from the latest email that lists them. |
 
 </div>
 </details>
@@ -236,7 +238,7 @@ It has a single attribute:
 
 | **Attribute**     | **Description**                                                              |
 |-------------------|------------------------------------------------------------------------------|
-| **orders**        | This is the list of future orders that have been parsed by the integration.  |
+| **orders**        | This is the list of future orders that have been parsed by the integration, each with its `products`.  |
 
 </div>
 </details>

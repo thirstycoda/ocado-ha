@@ -32,6 +32,8 @@ from .const import (
     REGEX_EDIT_UNTIL,
     REGEX_ISO_TIME,
     REGEX_MISSING_ITEM,
+    REGEX_PRODUCT_ROW,
+    REGEX_PRODUCTS_HEADER,
     REGEX_MONTH_FULL,
     REGEX_ORDINALS,
     REGEX_SUBSTITUTION,
@@ -279,12 +281,22 @@ def email_triage(self) -> tuple[list[Any], OcadoEmails | None]:
         # If the order number isn't in the list of cancelled order numbers
         if ocado_email.order_number not in ocado_cancelled:
             if ocado_email.email_type in ("confirmation", "update"):
+                ocado_email.products = parse_products(ocado_email.body)
                 # Make sure we're not adding an older version of an order we already have
                 _LOGGER.debug("Confirmed order is not in the list of confirmed orders? %s", ocado_email.order_number not in ocado_confirmed_orders)
                 if ocado_email.order_number not in ocado_confirmed_orders:
                     ocado_confirmed_orders.append(ocado_email.order_number)
                     ocado_confirmations.append(ocado_email)
                     _LOGGER.debug("Ocado order (%s) added to confirmations.", ocado_email.order_number)
+                else:
+                    # Emails are walked newest-first: if the newest email for this
+                    # order carried no product table, use the most recent one that did.
+                    newest = next(
+                        (c for c in ocado_confirmations if c.order_number == ocado_email.order_number),
+                        None,
+                    )
+                    if newest is not None and not newest.products and ocado_email.products:
+                        newest.products = ocado_email.products
             elif ocado_email.email_type == "new_total":
                 # We only care about the most recent new total
                 if ocado_total is None:
@@ -427,6 +439,29 @@ def parse_missing_items(body: str) -> list[dict[str, Any]]:
     ]
 
 
+def parse_products(body: str | None) -> list[dict[str, Any]]:
+    """Return the products of a confirmation email's "Products you've ordered" table.
+
+    Each product is ``{"name": str, "quantity": int, "price": str}``. Returns an
+    empty list when the email has no product table.
+    """
+    if not body:
+        return []
+    header = re.search(REGEX_PRODUCTS_HEADER, body)
+    if header is None:
+        return []
+    rest = body[header.end():]
+    products: list[dict[str, Any]] = []
+    while (row := re.match(REGEX_PRODUCT_ROW, rest)) is not None:
+        products.append({
+            "name"      : row.group("name").strip(),
+            "quantity"  : int(row.group("qty")),
+            "price"     : row.group("price"),
+        })
+        rest = rest[row.end():]
+    return products
+
+
 def delivery_update_parse(ocado_email: OcadoEmail) -> OcadoDeliveryUpdate:
     """Parse a delivery-day update email into missing and substituted items."""
     body = ocado_email.body or ""
@@ -501,6 +536,9 @@ def order_parse(ocado_email: OcadoEmail) -> OcadoOrder:
         delivery_window_end = delivery_window_end,
         edit_datetime       = get_edit_datetime(message),
         estimated_total     = get_estimated_total(message),
+        products            = (
+            ocado_email.products if ocado_email.products is not None else parse_products(message)
+        ),
     )
 
 
@@ -642,6 +680,7 @@ def delivery_attributes(order: OcadoOrder | None) -> dict[str, Any]:
             "delivery_window"   : None,
             "edit_deadline"     : None,
             "estimated_total"   : None,
+            "products"          : [],
         }
     start, end = order.delivery_datetime, order.delivery_window_end
     return {
@@ -651,6 +690,7 @@ def delivery_attributes(order: OcadoOrder | None) -> dict[str, Any]:
         "delivery_window"   : get_window(start, end) if start and end else None,
         "edit_deadline"     : order.edit_datetime,
         "estimated_total"   : order.estimated_total,
+        "products"          : order.products,
     }
 
 

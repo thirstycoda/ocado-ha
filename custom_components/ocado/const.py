@@ -86,6 +86,11 @@ REGEX_VOUCHER_CODE  = r"\bvou[a-z]*\d{6,}\b"
 REGEX_SUBSTITUTION  = r"•\s*(\d+)\s*x\s*(.+?)\s*\n\s*with\s*\n\s*•\s*(\d+)\s*x\s*(.+)"
 REGEX_MISSING_ITEM  = r"•\s*(\d+)\s*x\s*(.+)"
 
+# One row of the "Products you've ordered" table, as BeautifulSoup flattens it:
+# product name, quantity and price on consecutive lines.
+REGEX_PRODUCTS_HEADER = r"Products\s+you(?:’|')ve\s+ordered\s*\n\s*Product\s*\n\s*Qty\s*\n\s*Price to pay[^\n]*\n"
+REGEX_PRODUCT_ROW     = r"\A[ \t]*(?P<name>[^\n]+?)[ \t]*\n[ \t]*(?P<qty>\d{1,3})[ \t]*\n[ \t]*£[ \t]*(?P<price>\d+\.\d{2})[ \t]*(?:\n|\Z)"
+
 EMPTY_ATTRIBUTES = {
     "order_number"          : None,
     "delivery_date"         : None,
@@ -107,6 +112,7 @@ class OcadoEmail:
     order_number        : str   | None
     delivery_datetime   : datetime | None = None
     delivery_window_end : datetime | None = None
+    products            : list[dict[str, Any]] | None = None
 
 @dataclass
 class OcadoVoucher:
@@ -145,6 +151,7 @@ class OcadoOrder:
     delivery_window_end         : datetime | None
     edit_datetime               : datetime | None
     estimated_total             : str      | None
+    products                    : list[dict[str, Any]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         """Return a JSON-safe dict of the order, with datetimes as ISO strings."""
