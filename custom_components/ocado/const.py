@@ -88,7 +88,7 @@ REGEX_MISSING_ITEM  = r"•\s*(\d+)\s*x\s*(.+)"
 
 # One row of the "Products you've ordered" table, as BeautifulSoup flattens it:
 # product name, quantity and price on consecutive lines.
-REGEX_PRODUCTS_HEADER = r"Products\s+you(?:’|')ve\s+ordered\s*\n\s*Product\s*\n\s*Qty\s*\n\s*Price to pay[^\n]*\n"
+REGEX_PRODUCTS_HEADER = r"Products\s+you(?:’|')ve\s+ordered\s*\n\s*Product\s*\n\s*Qty\s*\n\s*Price[^\n]*\n"
 REGEX_PRODUCT_ROW     = r"\A[ \t]*(?P<name>[^\n]+?)[ \t]*\n[ \t]*(?P<qty>\d{1,3})[ \t]*\n[ \t]*£[ \t]*(?P<price>\d+\.\d{2})[ \t]*(?:\n|\Z)"
 
 EMPTY_ATTRIBUTES = {

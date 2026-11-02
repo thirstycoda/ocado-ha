@@ -69,6 +69,11 @@ def test_parse_products() -> None:
     assert parse_products(PRODUCTS_BODY) == EXPECTED
 
 
+def test_parse_products_order_change_header() -> None:
+    """Order-change emails title the last column just "Price"."""
+    assert parse_products(PRODUCTS_BODY.replace("Price to pay (£)", "Price")) == EXPECTED
+
+
 def test_parse_products_straight_apostrophe() -> None:
     """The header matches with a plain apostrophe as well as a curly one."""
     assert parse_products(PRODUCTS_BODY.replace("you’ve ordered", "you've ordered")) == EXPECTED
