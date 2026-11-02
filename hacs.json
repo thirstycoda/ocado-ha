@@ -1,7 +1,7 @@
 {
     "name": "Ocado",
-    "country": ["gb"],
-    "content_in_root": false,
-    "zip_release": true,
-    "filename": "ocado.zip"
+    "country": [
+        "gb"
+    ],
+    "content_in_root": false
 }
